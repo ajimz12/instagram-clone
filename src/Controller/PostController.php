@@ -56,7 +56,7 @@ final class PostController extends AbstractController{
             $entityManager->persist($post);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_main', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('post/new.html.twig', [

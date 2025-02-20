@@ -10,7 +10,7 @@
 
 	{% for post in user.posts %}
 		<div>
-			<image src="{{post.getImage()}}"/>
+			<img src="{{ asset('assets/images/' ~ post.getImage()) }}" alt="{{ post.getDescription() }}"/>
 			<p>Likes:
 				{{ post.getLikes() }}</p>
 			<p>{{post.getUser().getUsername()}}{{post.getDescription()}}</p>
