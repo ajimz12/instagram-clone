@@ -25,7 +25,7 @@ class PostRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('p')
             ->join('p.user', 'u')
             ->where('u IN (:following)')
-            ->setParameter('following', $user->getFollow()->toArray()) 
+            ->setParameter('following', $user->getFollow()->toArray()) // Obtener usuarios seguidos
             ->orderBy('p.date', 'DESC')
             ->getQuery()
             ->getResult();
