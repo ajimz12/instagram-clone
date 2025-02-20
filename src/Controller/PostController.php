@@ -64,6 +64,15 @@ final class PostController extends AbstractController{
             'form' => $form,
         ]);
     }
+  
+    #[Route('/admin/posts', name: 'admin_posts')]
+        #[IsGranted('ROLE_ADMIN')]
+        public function adminPosts(PostRepository $postRepository): Response
+        {
+            return $this->render('post/admin_posts.html.twig', [
+                'posts' => $postRepository->findAll(),
+            ]);
+        }
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
     public function show(Post $post): Response
@@ -116,8 +125,7 @@ final class PostController extends AbstractController{
         return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
     }
 
-
-
+  
     
     #[Route('/{id}/like', name: 'app_post_like', methods: ['POST'])]
     public function like(Post $post, EntityManagerInterface $entityManager): Response

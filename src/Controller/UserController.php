@@ -14,14 +14,31 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/user')]
 final class UserController extends AbstractController{
-    #[Route(name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository): Response
+
+
+    #[Route('/admin', name: 'admin_users')]
+    public function adminUsers(UserRepository $userRepository): Response
     {
-        return $this->render('user/index.html.twig', [
+        return $this->render('user/admin_users.html.twig', [
             'users' => $userRepository->findAll(),
         ]);
     }
+    
+    #[Route('/{id}/make-admin', name: 'make_admin', methods: ['POST'])]
+    public function makeAdmin(User $user, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('make_admin'.$user->getId(), $request->request->get('_token'))) {
+            if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+                $user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
+                $entityManager->flush();
+                $this->addFlash('success', 'Usuario promovido a administrador correctamente.');
+            }
+        }
 
+
+        return $this->redirectToRoute('admin_users');
+    }
+    
     #[Route('/{id}/follow', name: 'follow', methods: ['GET'])]
     public function follow(User $targetUser, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -35,7 +52,6 @@ final class UserController extends AbstractController{
 
         return $this->json(['message' => 'User followed successfully']);
     }
-
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -56,6 +72,9 @@ final class UserController extends AbstractController{
         ]);
     }
 
+    
+
+ 
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(User $user , UserRepository $userRepository): Response
     {
@@ -93,4 +112,6 @@ final class UserController extends AbstractController{
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
+
+
 }

@@ -12,6 +12,7 @@ class MainController extends AbstractController
     #[Route('/', name: 'app_main')]
     public function index(PostRepository $postRepository): Response
     {
+
         $user = $this->getUser();
 
         $posts = [];

@@ -1,9 +1,28 @@
 {% extends 'base.html.twig' %}
 
-{% block body %}
-    <h1>Feed</h1>
+{% block title %}Instagram{% endblock %}
 
-    {% if posts is empty %}
+ 
+
+{% block body %}
+
+    <div class="welcome-container" style="text-align: left; padding: 20px; margin-top: 20px;">
+        <h1>Bienvenido, {% if app.user %}{{ app.user.username }}{% endif %}</h1> <a href="{{ path('app_logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+ {% if is_granted('ROLE_ADMIN') %}
+        <div class="admin-panel" style="text-align: center; padding: 20px; margin: 20px; background-color: #f8f9fa; border-radius: 5px;">
+            <h3>Panel de Administración</h3>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ path('admin_users') }}" class="btn btn-primary">Gestionar Usuarios</a>
+                <a href="{{ path('admin_posts') }}" class="btn btn-primary">Gestionar Posts</a>
+                <a href="{{ path('admin_comments') }}" class="btn btn-primary">Gestionar Comentarios</a>
+            </div>
+        </div>
+    {% endif %}
+
+    <div style="text-align: center; padding: 20px; margin-top: 20px;">
+        <h2>Publicaciones</h2>
+         {% if posts is empty %}
         <p>No hay publicaciones disponibles.</p>
     {% else %}
         {% for post in posts %}
@@ -19,4 +38,7 @@
             <hr>
         {% endfor %}
     {% endif %}
+       
+    </div>
 {% endblock %}
+
