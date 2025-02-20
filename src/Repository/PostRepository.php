@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Post;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -31,7 +32,22 @@ class PostRepository extends ServiceEntityRepository
         ;
     }
 
-//    /**
+
+
+     * Obtiene los posts de los usuarios seguidos por el usuario dado.
+     */
+    public function findFollowedUsersPosts(User $user): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.user', 'u')
+            ->where('u IN (:following)')
+            ->setParameter('following', $user->getFollow()->toArray()) // Obtener usuarios seguidos
+            ->orderBy('p.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+  
+  //    /**
 //     * @return Post[] Returns an array of Post objects
 //     */
 //    public function findByExampleField($value): array
@@ -55,4 +71,5 @@ class PostRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
 }
