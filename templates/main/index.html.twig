@@ -10,7 +10,9 @@
             <div>
                 <h3>{{ post.user.username }}</h3>
                 <p>{{ post.description }}</p>
-                <img src="{{ asset(post.image) }}" alt="Imagen del post">
+                {% if post.image %}
+                    <img src="{{ asset(post.image) }}" alt="Imagen del post">
+                {% endif %}
                 <p>Likes: {{ post.likes }}</p>
                 <p>Fecha: {{ post.date|date('d/m/Y') }}</p>
             </div>

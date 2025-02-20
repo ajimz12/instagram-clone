@@ -18,19 +18,16 @@ class PostRepository extends ServiceEntityRepository
     }
 
     /**
-     * Encuentra los posts de los usuarios seguidos por un usuario en particular.
-     * Opcionalmente, puede incluir los posts del usuario en cuestión.
+     * Obtiene los posts de los usuarios seguidos por el usuario dado.
      */
     public function findFollowedUsersPosts(User $user): array
     {
         return $this->createQueryBuilder('p')
-            ->innerJoin('p.user', 'u')
-            ->innerJoin('App\Entity\UserUser', 'uu', 'WITH', 'uu.userTarget = u AND uu.userSource = :user')
-            ->where('uu.userSource = :user')
-            ->setParameter('user', $user)
+            ->join('p.user', 'u')
+            ->where('u IN (:following)')
+            ->setParameter('following', $user->getFollow()->toArray()) 
             ->orderBy('p.date', 'DESC')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 }

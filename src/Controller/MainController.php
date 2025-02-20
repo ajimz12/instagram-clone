@@ -13,11 +13,11 @@ class MainController extends AbstractController
     public function index(PostRepository $postRepository): Response
     {
         $user = $this->getUser();
-        if (!$user) {
-            return $this->redirectToRoute('app_login');
-        }
 
-        $posts = $postRepository->findFollowedUsersPosts($user);
+        $posts = [];
+        if ($user) {
+            $posts = $postRepository->findFollowedUsersPosts($user);
+        }
 
         return $this->render('main/index.html.twig', [
             'posts' => $posts
