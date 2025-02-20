@@ -7,9 +7,12 @@ use App\Form\PostType;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/post')]
 final class PostController extends AbstractController{
@@ -22,13 +25,34 @@ final class PostController extends AbstractController{
     }
 
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, ParameterBagInterface $params): Response
     {
         $post = new Post();
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
+        $brochuresDirectory = $params->get('brochures_directory');
+
         if ($form->isSubmitted() && $form->isValid()) {
+            $image = $form->get('image')->getData();
+
+            if ($image) {
+                $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$image->guessExtension();
+
+                try {
+                    $image->move($brochuresDirectory, $newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'There was an error uploading your image');
+                    return $this->redirectToRoute('app_post_new');
+                }
+                $post->setImage($newFilename);
+                $post->setUser($this->getUser());
+                $post->setDate(new \DateTime('now'));
+                $post->setLikes(0);
+            }
+
             $entityManager->persist($post);
             $entityManager->flush();
 
@@ -50,14 +74,28 @@ final class PostController extends AbstractController{
     }
 
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Post $post, EntityManagerInterface $entityManager, SluggerInterface $slugger, ParameterBagInterface $params): Response
     {
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            $image = $form->get('image')->getData();
 
+            if ($image) {
+                $originalFilename = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$image->guessExtension();
+
+                try {
+                    $image->move($params->get('brochures_directory'), $newFilename);
+                    $post->setImage($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'There was an error uploading your image');
+                }
+            }
+
+            $entityManager->flush();
             return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
         }
 
