@@ -77,4 +77,16 @@ final class PostController extends AbstractController{
 
         return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
     }
+
+
+
+    
+    #[Route('/{id}/like', name: 'app_post_like', methods: ['POST'])]
+    public function like(Post $post, EntityManagerInterface $entityManager): Response
+    {
+        $post->setLikes($post->getLikes() + 1);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+    }
 }
