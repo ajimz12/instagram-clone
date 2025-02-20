@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
+use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,33 @@ final class UserController extends AbstractController{
     {
         return $this->render('user/index.html.twig', [
             'users' => $userRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/search', name: 'app_user_search', methods: ['GET'])]
+    public function search(UserRepository $userRepository, PostRepository $postRepository, Request $request): Response
+    {   
+        $users = null;
+        $posts = null;
+
+        // Para comprobar si el usuario ha enviado el formulario de búsqueda
+        $search = $request->query->get('search');
+        // Guardamos el texto del input tipo texto en una variable
+        $text = $request->query->get('find');
+
+        if (isset($text) && $text != "") {
+            if (isset($search)) {
+                if ($search == "username") {
+                    $users = $userRepository->findByUsername($text);
+                } else { // == post
+                    $posts = $postRepository->findByPost($text);
+                }
+            }
+        }
+
+        return $this->render('user/search.html.twig', [
+            'users' => $users,
+            'posts' => $posts
         ]);
     }
 
