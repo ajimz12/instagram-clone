@@ -7,6 +7,7 @@ use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -34,9 +35,23 @@ final class UserController extends AbstractController{
             }
         }
 
+
         return $this->redirectToRoute('admin_users');
     }
     
+    #[Route('/{id}/follow', name: 'follow', methods: ['GET'])]
+    public function follow(User $targetUser, EntityManagerInterface $entityManager): JsonResponse
+    {
+        if (!$this->getUser() || $this->getUser()->getId() === $targetUser->getId()) {
+            return $this->json(['error' => 'You cannot follow yourself'], 403);
+        }
+       
+        $this->getUser()->addFollow($targetUser); 
+        $entityManager->persist($this->getUser());
+        $entityManager->flush();
+
+        return $this->json(['message' => 'User followed successfully']);
+    }
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -61,8 +76,9 @@ final class UserController extends AbstractController{
 
  
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
-    public function show(User $user): Response
+    public function show(User $user , UserRepository $userRepository): Response
     {
+        $user = $userRepository->findAll();
         return $this->render('user/show.html.twig', [
             'user' => $user,
         ]);
