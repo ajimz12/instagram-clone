@@ -77,4 +77,12 @@ final class CommentController extends AbstractController{
 
         return $this->redirectToRoute('app_comment_index', [], Response::HTTP_SEE_OTHER);
     }
+    #[Route('/admin/comments', name: 'admin_comments')]
+        #[IsGranted('ROLE_ADMIN')]
+        public function adminComments(CommentRepository $commentRepository): Response
+        {
+            return $this->render('comment/admin_comments.html.twig', [
+                'comments' => $commentRepository->findAll(),
+            ]);
+        }
 }

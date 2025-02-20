@@ -77,4 +77,12 @@ final class PostController extends AbstractController{
 
         return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
     }
+    #[Route('/admin/posts', name: 'admin_posts')]
+        #[IsGranted('ROLE_ADMIN')]
+        public function adminPosts(PostRepository $postRepository): Response
+        {
+            return $this->render('post/admin_posts.html.twig', [
+                'posts' => $postRepository->findAll(),
+            ]);
+        }
 }
