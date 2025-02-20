@@ -1,0 +1,25 @@
+alvaro,miguel,jorge,carlos,illias,ramon,ivan
+
+users (id,roles)
+
+UsersFollowers(id,user,follower)
+
+publicaciones(id,user,imgen,descripcion,likes),
+
+comentarios(id,user,idPost,texto)
+
+También podrán comentar publicaciones.(post)
+
+Los usuarios pueden seguir a otros usuarios.------
+
+Habrá un rol administrador que podrá administrar usuarios, posts y comentarios.-----
+
+Cuando un usuario inicia sesión mostraremos los posts más recientes de los usuarios a los que siguen.
+
+Podremos acceder a los perfiles de otros usuarios, mostrando sus datos y sus posts.
+
+El usuario podrá buscar usuarios y posts.---------(jorge)
+
+El usuario podrá dar "me gusta" a posts.--------(carlos)
+
+
