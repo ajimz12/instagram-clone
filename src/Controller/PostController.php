@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment;
 use App\Entity\Post;
+use App\Form\CommentType;
 use App\Form\PostType;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,6 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/post')]
+#[IsGranted('ROLE_ADMIN')]
 final class PostController extends AbstractController{
     #[Route(name: 'app_post_index', methods: ['GET'])]
     public function index(PostRepository $postRepository): Response
@@ -75,10 +78,25 @@ final class PostController extends AbstractController{
         }
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
-    public function show(Post $post): Response
+    #[Route('/{id}', name: 'app_post_show', methods: ['GET', 'POST'])]
+    public function show(Post $post, Request $request, EntityManagerInterface $entityManager): Response
     {
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setUser($this->getUser());
+            $comment->setPost($post);            
+            $entityManager->persist($comment);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_post_show', ['id' => $post->getId()]);
+        }
+
         return $this->render('post/show.html.twig', [
             'post' => $post,
+            'form' => $form,
         ]);
     }
 
@@ -127,12 +145,12 @@ final class PostController extends AbstractController{
 
   
     
-    #[Route('/{id}/like', name: 'app_post_like', methods: ['POST'])]
+    #[Route('/{id}/like', name: 'app_post_like', methods: ['POST', 'GET'])]
     public function like(Post $post, EntityManagerInterface $entityManager): Response
     {
         $post->setLikes($post->getLikes() + 1);
         $entityManager->flush();
 
-        return $this->redirectToRoute('app_post_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_main', [], Response::HTTP_SEE_OTHER);
     }
 }

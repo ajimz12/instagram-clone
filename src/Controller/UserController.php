@@ -35,6 +35,8 @@ final class UserController extends AbstractController{
                 $this->addFlash('success', 'Usuario promovido a administrador correctamente.');
             }
         }
+        return $this->redirectToRoute('admin_users');
+    }
 
 
     #[Route('/search', name: 'app_user_search', methods: ['GET'])]
@@ -66,11 +68,11 @@ final class UserController extends AbstractController{
 
 
 
-        return $this->redirectToRoute('admin_users');
-    }
+        
     
-    #[Route('/{id}/follow', name: 'follow', methods: ['GET'])]
-    public function follow(User $targetUser, EntityManagerInterface $entityManager): JsonResponse
+    
+    #[Route('/{id}/follow', name: 'app_user_follow', methods: ['GET'])]
+    public function follow(User $targetUser, EntityManagerInterface $entityManager): Response
     {
         if (!$this->getUser() || $this->getUser()->getId() === $targetUser->getId()) {
             return $this->json(['error' => 'You cannot follow yourself'], 403);
@@ -80,7 +82,8 @@ final class UserController extends AbstractController{
         $entityManager->persist($this->getUser());
         $entityManager->flush();
 
-        return $this->json(['message' => 'User followed successfully']);
+        // return $this->json(['message' => 'User followed successfully']);
+        return $this->redirectToRoute('app_main', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]

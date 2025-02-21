@@ -19,7 +19,7 @@
             </div>
         </div>
     {% endif %}
-
+<a href="{{ path('app_user_search') }}">Buscar</a>
     <div style="text-align: center; padding: 20px; margin-top: 20px;">
         <h2>Publicaciones</h2>
          {% if posts is empty %}
@@ -30,9 +30,10 @@
                 <h3>{{ post.user.username }}</h3>
                 <p>{{ post.description }}</p>
                 {% if post.image %}
-                    <img src="{{ asset(post.image) }}" alt="Imagen del post">
+                    <img src="{{ asset('assets/images/' ~ post.getImage()) }}" alt="{{ post.getDescription() }}"/>
                 {% endif %}
-                <p>Likes: {{ post.likes }}</p>
+                <br />
+                <a href="{{ path('app_post_like', {'id': post.id}) }}">Likes: {{ post.likes }}</a>
                 <p>Fecha: {{ post.date|date('d/m/Y') }}</p>
             </div>
             <hr>
